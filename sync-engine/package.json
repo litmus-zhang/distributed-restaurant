@@ -1,0 +1,29 @@
+{
+  "name": "sync-engine",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "NODE_ENV=production bun run ./src/index.ts",
+    "lint": "bun x @biomejs/biome check src",
+    "lint:fix": "bun lint --write",
+    "generate": "bun x drizzle-kit generate",
+    "push": "bun x drizzle-kit push",
+    "migrate": "bun x drizzle-kit migrate",
+    "studio": "bun x drizzle-kit studio"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "@restatedev/restate-sdk": "^1.14.4",
+    "@restatedev/restate-sdk-clients": "^1.14.4",
+    "@verrou/core": "^0.5.1",
+    "drizzle-orm": "^0.44.7",
+    "elysia": "^1.4.16",
+    "env-var": "^7.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/bun": "^1.3.2",
+    "@biomejs/biome": "^2.3.5",
+    "drizzle-kit": "^0.31.7"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "building-restate-services": {
+      "source": "restatedev/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/restatedev/skills/building-restate-services/SKILL.md",
+      "computedHash": "b69a659a2b0433f9468f403e145b1b0dd375e82f8b4e8b9667d3635903c708f5"
+    },
+    "drizzle-orm-patterns": {
+      "source": "giuseppe-trisciuoglio/developer-kit",
+      "sourceType": "github",
+      "skillPath": "plugins/developer-kit-typescript/skills/drizzle-orm-patterns/SKILL.md",
+      "computedHash": "d63e6d73a9f579b505a5694af2f3b3200c2b5eeea147e88b9b6d1e5fce23bcbb"
+    },
+    "elysiajs": {
+      "source": "elysiajs/skills",
+      "sourceType": "github",
+      "skillPath": "elysia/SKILL.md",
+      "computedHash": "55268e69a2c766ed67e56a0db57544f60cc52dba0c7f024a974baf965e525e1b"
+    }
+  }
+}
