@@ -78,4 +78,4 @@ npx @restatedev/restate deployments register --use-http1.1 --force http://localh
 ```
 
 #### D. Send a Test Sync Request
-Check the Restate UI [http://localhost:9070]() for confirmation of the steps. 
+Check the Restate UI [http://localhost:9070]() for confirmation of the steps and easy debugging and fixes. 
