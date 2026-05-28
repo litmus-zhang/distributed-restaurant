@@ -5,30 +5,8 @@ import { LocalQueue } from "./client/queue.ts";
 import { db } from "./db/index.ts";
 import { inventory, syncLog, syncOutbox } from "./db/schema.ts";
 import { app } from "./server.ts";
-import { processSyncBatch } from "./services/restate.ts";
-
-// Minimal mock of Restate ObjectContext
-class MockObjectContext {
-	constructor(public readonly key: string) {}
-
-	private state = new Map<string, any>();
-
-	async get<T>(key: string): Promise<T | null> {
-		return this.state.get(key) ?? null;
-	}
-
-	set(key: string, value: any): void {
-		this.state.set(key, value);
-	}
-
-	clear(key: string): void {
-		this.state.delete(key);
-	}
-
-	async run<T>(fn: () => Promise<T> | T): Promise<T> {
-		return await fn();
-	}
-}
+import type { inventorySaga } from "./services/restate.ts";
+import { restateClient } from "./services/restate-client.ts";
 
 describe("Inventory Sync Engine Saga Tests", () => {
 	const tenantId = "tenant-1";
@@ -99,16 +77,17 @@ describe("Inventory Sync Engine Saga Tests", () => {
 		expect(outboxBefore.length).toBe(1);
 		expect(outboxBefore[0]?.status).toBe("pending");
 
-		// 2. Invoke Restate Saga (processSyncBatch) using the Mock Context
-		const mockCtx = new MockObjectContext(tenantId) as any;
-		const sagaResult = await processSyncBatch(mockCtx, {
-			syncId: response.syncId,
-			changes: batch.map((item) => ({
-				sku: item.sku,
-				quantityChange: item.quantityChange,
-				versionNumber: item.versionNumber,
-			})),
-		});
+		// 2. Invoke Restate Saga using the Restate Client
+		const sagaResult = await restateClient
+			.objectClient<typeof inventorySaga>({ name: "InventorySaga" }, tenantId)
+			.processSyncBatch({
+				syncId: response.syncId,
+				changes: batch.map((item) => ({
+					sku: item.sku,
+					quantityChange: item.quantityChange,
+					versionNumber: item.versionNumber,
+				})),
+			});
 
 		expect(sagaResult.success).toBe(true);
 
@@ -178,15 +157,16 @@ describe("Inventory Sync Engine Saga Tests", () => {
 			.then((res) => res.json() as Promise<{ syncId: string; status: string }>);
 
 		// Invoke Restate Saga
-		const mockCtx = new MockObjectContext(tenantId) as any;
-		const sagaResult = await processSyncBatch(mockCtx, {
-			syncId: response.syncId,
-			changes: batch.map((item) => ({
-				sku: item.sku,
-				quantityChange: item.quantityChange,
-				versionNumber: item.versionNumber,
-			})),
-		});
+		const sagaResult = await restateClient
+			.objectClient<typeof inventorySaga>({ name: "InventorySaga" }, tenantId)
+			.processSyncBatch({
+				syncId: response.syncId,
+				changes: batch.map((item) => ({
+					sku: item.sku,
+					quantityChange: item.quantityChange,
+					versionNumber: item.versionNumber,
+				})),
+			});
 
 		expect(sagaResult.success).toBe(false);
 		expect(sagaResult.error).toContain("version_mismatch");
@@ -267,15 +247,16 @@ describe("Inventory Sync Engine Saga Tests", () => {
 			.then((res) => res.json() as Promise<{ syncId: string; status: string }>);
 
 		// Invoke Restate Saga
-		const mockCtx = new MockObjectContext(tenantId) as any;
-		const sagaResult = await processSyncBatch(mockCtx, {
-			syncId: response.syncId,
-			changes: batch.map((item) => ({
-				sku: item.sku,
-				quantityChange: item.quantityChange,
-				versionNumber: item.versionNumber,
-			})),
-		});
+		const sagaResult = await restateClient
+			.objectClient<typeof inventorySaga>({ name: "InventorySaga" }, tenantId)
+			.processSyncBatch({
+				syncId: response.syncId,
+				changes: batch.map((item) => ({
+					sku: item.sku,
+					quantityChange: item.quantityChange,
+					versionNumber: item.versionNumber,
+				})),
+			});
 
 		expect(sagaResult.success).toBe(false);
 		expect(sagaResult.error).toContain("insufficient_stock");

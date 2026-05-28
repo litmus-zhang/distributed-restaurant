@@ -48,10 +48,12 @@ bun test
 
 ### 4. Start the Application
 
+
 #### A. Start the Elysia API Server (Port 3000)
 ```bash
 bun dev
 ```
+
 
 
 #### B. Start the Restate Coordinator (Docker)
@@ -70,7 +72,10 @@ restate-server
 ```
 
 #### C. Register the Deployment
-Tell the coordinator where to find your Saga service:
+With the Restate server and API server running, Tell the Restate coordinator where to find your Saga service:
 ```bash
-npx @restatedev/restate deployments register http://localhost:9080
+npx @restatedev/restate deployments register --use-http1.1 --force http://localhost:3000/restate 
 ```
+
+#### D. Send a Test Sync Request
+Check the Restate UI [http://localhost:9070]() for confirmation of the steps. 

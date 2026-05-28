@@ -30,7 +30,7 @@ export async function processSyncBatch(
 	try {
 		for (const change of changes) {
 			// Step 1: Verify & Reserve
-			const reserveResult = await ctx.run(async () => {
+			const reserveResult = await ctx.run(`verify-reserve:${change.sku}`, async () => {
 				return await verifyAndReserveItem(
 					tenantId,
 					change.sku,
@@ -47,7 +47,7 @@ export async function processSyncBatch(
 			}
 
 			// Step 2: Log step success in the database
-			await ctx.run(async () => {
+			await ctx.run(`log-reserved:${change.sku}`, async () => {
 				await db.insert(syncLog).values({
 					id: randomUUID(),
 					tenantId,
@@ -63,7 +63,7 @@ export async function processSyncBatch(
 		}
 
 		// All steps in the batch succeeded! Mark outbox as processed.
-		await ctx.run(async () => {
+		await ctx.run(`mark-outbox-processed:${syncId}`, async () => {
 			await db
 				.update(syncOutbox)
 				.set({ status: "processed" })
@@ -78,11 +78,11 @@ export async function processSyncBatch(
 
 			// Compensation Flow: Rollback completed steps in reverse order
 			for (const step of [...completedSteps].reverse()) {
-				await ctx.run(async () => {
+				await ctx.run(`compensate:${step.sku}`, async () => {
 					await compensateItem(tenantId, step.sku, step.quantityChange);
 				});
 
-				await ctx.run(async () => {
+				await ctx.run(`log-compensated:${step.sku}`, async () => {
 					await db.insert(syncLog).values({
 						id: randomUUID(),
 						tenantId,
@@ -96,7 +96,7 @@ export async function processSyncBatch(
 			}
 
 			// Mark outbox status as failed_conflict
-			await ctx.run(async () => {
+			await ctx.run(`mark-outbox-failed:${syncId}`, async () => {
 				await db
 					.update(syncOutbox)
 					.set({ status: "failed_conflict" })
